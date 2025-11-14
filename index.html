@@ -1,0 +1,168 @@
+<!-- Задание 10.
+[Вариант 1]. Напишите игру - [Тетрис] - Змейка. Сложность (скорость / длина змейки) повышается с каждым поеданием цели. 
+Управление змейкой осуществляется клавиатурой. Игрок должен видеть текущий уровень. 
+Учесть что столкновение головы змеи с телом приводит к поражению игрока. -->
+<body style="margin:0; background:#111;">
+
+<!-- Поле, на котором рисуем игру -->
+<canvas id="game" width="400" height="400" 
+        style="background:#000; display:block; margin:20px auto; border:3px solid #fff;"></canvas>
+
+<!-- Показ уровня игрока -->
+<div id="lvl" style="text-align:center; color:white; font-size:22px;">
+    Уровень: 1
+</div>
+
+<script>
+    // Находим сам canvas
+    const canvas = document.getElementById("game");
+    // Получаем кисть инструмент рисования
+    const ctx = canvas.getContext("2d");
+    // Находим блок, где показываем уровень
+    const lvlDiv = document.getElementById("lvl");
+
+    // Размер одной клетки (змейка и еда рисуются как сетка 20х20)
+    const size = 20;
+
+    // Начальное положение змейки - один сегмент (голова)
+    let snake = [{x: 200, y: 200}];
+
+    // Направление движения по осям (dx - вправо, dy - вниз)
+    let dx = size; // идём вправо
+    let dy = 0;    // не двигаемся по вертикали
+
+    // Координаты еды (генерируем в случайной клетке)
+    let food = genFood();
+
+    // Текущий уровень
+    let level = 1;
+
+    // Скорость - чем меньше число, тем быстрее
+    let speed = 200;
+
+    // Таймер игрового цикла
+    let timer;
+
+    // Навешиваем управление стрелками
+    document.addEventListener("keydown", key);
+
+    // Запуск игры
+    start();
+
+    // Запуск игрового цикла - вызываем game() каждые speed мс
+    function start() {
+        timer = setInterval(game, speed);
+    }
+
+    // Основная логика игры
+    function game() {
+
+        // Создаём новую голову по направлению движения
+        let head = {
+            x: snake[0].x + dx,
+            y: snake[0].y + dy
+        };
+
+        // Проверка: если голова вышла за границы поля - игра окончена
+        if (head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400) {
+            lose();
+            return;
+        }
+
+        // Проверка: если голова столкнулась с телом - проигрыш
+        for (let i = 0; i < snake.length; i++) {
+            if (snake[i].x === head.x && snake[i].y === head.y) {
+                lose();
+                return;
+            }
+        }
+
+        // Добавляем голову в начало массива змейки
+        snake.unshift(head);
+
+        // Проверка: съели еду?
+        if (head.x === food.x && head.y === food.y) {
+
+            // Генерируем новую еду
+            food = genFood();
+
+            // Увеличиваем уровень
+            level++;
+            lvlDiv.textContent = "Уровень: " + level;
+
+            // Ускоряем игру
+            clearInterval(timer);            // останавливаем старую скорость
+            speed = Math.max(60, speed - 15); // делаем игру быстрее
+            timer = setInterval(game, speed); // запускаем снова
+
+        } else {
+            // Если еду не съели - удаляем последний сегмент (хвост)
+            snake.pop();
+        }
+
+        // Отрисовываем всё поле
+        draw();
+    }
+
+    // Функция рисования игры
+    function draw() {
+
+        // Заливаем всё поле чёрным цветом
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, 400, 400);
+
+        // Рисуем еду (красный квадрат)
+        ctx.fillStyle = "red";
+        ctx.fillRect(food.x, food.y, size, size);
+
+        // Рисуем каждую часть змейки
+        ctx.fillStyle = "lime";
+        snake.forEach(segment => {
+            ctx.fillRect(segment.x, segment.y, size - 1, size - 1);
+        });
+    }
+
+    // Управление стрелками
+    function key(e) {
+        // Вверх (разрешено только если змейка НЕ двигается вверх/вниз)
+        if (e.key === "ArrowUp" && dy === 0) {
+            dx = 0;
+            dy = -size;
+        }
+
+        // Вниз
+        if (e.key === "ArrowDown" && dy === 0) {
+            dx = 0;
+            dy = size;
+        }
+
+        // Влево
+        if (e.key === "ArrowLeft" && dx === 0) {
+            dx = -size;
+            dy = 0;
+        }
+
+        // Вправо
+        if (e.key === "ArrowRight" && dx === 0) {
+            dx = size;
+            dy = 0;
+        }
+    }
+
+    // Генерация еды в случайной клетке от 0 до 19
+    function genFood() {
+        return {
+            x: Math.floor(Math.random() * 20) * size,
+            y: Math.floor(Math.random() * 20) * size
+        };
+    }
+
+    // Функция проигрыша
+    function lose() {
+        clearInterval(timer);                  // остановка игры
+        alert("Вы проиграли! Ваш уровень: " + level); // сообщение
+        location.reload();                     // перезапуск страницы
+    }
+</script>
+
+</body>
