@@ -63,11 +63,12 @@
 <div id="lvl">Уровень: 1</div>
 
 <div class="controls">
-    <div class="btn" onclick="move('up')">▲</div><br>
-    <div class="btn" onclick="move('left')">◀</div>
-    <div class="btn" onclick="move('down')">▼</div>
-    <div class="btn" onclick="move('right')">▶</div>
+    <div class="btn" ontouchstart="move('up')" onclick="move('up')">▲</div><br>
+    <div class="btn" ontouchstart="move('left')" onclick="move('left')">◀</div>
+    <div class="btn" ontouchstart="move('down')" onclick="move('down')">▼</div>
+    <div class="btn" ontouchstart="move('right')" onclick="move('right')">▶</div>
 </div>
+
 
 <script>
     const canvas = document.getElementById("game");
