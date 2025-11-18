@@ -15,9 +15,9 @@
     }
 
     #game {
-        width: 90vw;          /* 90% ширины экрана */
-        max-width: 500px;     /* ограничение на ПК */
-        aspect-ratio: 1/1;    /* квадрат */
+        width: 90vw;
+        max-width: 500px;
+        aspect-ratio: 1/1;
         background: black;
         border: 3px solid #fff;
         margin-top: 20px;
@@ -46,7 +46,6 @@
         border: 2px solid #555;
     }
 
-    /* На мобильных — кнопки меньше */
     @media (max-width: 480px) {
         .btn {
             width: 70px;
@@ -69,13 +68,12 @@
     <div class="btn" ontouchstart="move('right')" onclick="move('right')">▶</div>
 </div>
 
-
 <script>
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
 
-    let FIELD = 20;   
-    let CELL = 20;    
+    let FIELD = 20;
+    let CELL = 20;
 
     function resizeCanvas() {
         let real = canvas.clientWidth;
@@ -88,6 +86,7 @@
     resizeCanvas();
 
     let snake = [{ x: 10, y: 10 }];
+
     let dx = 1;
     let dy = 0;
 
@@ -95,25 +94,38 @@
 
     let level = 1;
     let speed = 200;
+
     let timer = setInterval(game, speed);
 
     document.addEventListener("keydown", key);
 
+    let turnLocked = false;
+
+    function setDirection(newDx, newDy) {
+        if (turnLocked) return;
+        if (newDx === -dx && newDy === -dy) return;
+        dx = newDx;
+        dy = newDy;
+        turnLocked = true;
+    }
+
     function move(dir) {
-        if (dir === "up" && dy === 0) { dx = 0; dy = -1; }
-        if (dir === "down" && dy === 0) { dx = 0; dy = 1; }
-        if (dir === "left" && dx === 0) { dx = -1; dy = 0; }
-        if (dir === "right" && dx === 0) { dx = 1; dy = 0; }
+        if (dir === "up")    setDirection(0, -1);
+        if (dir === "down")  setDirection(0,  1);
+        if (dir === "left")  setDirection(-1, 0);
+        if (dir === "right") setDirection(1,  0);
     }
 
     function key(e) {
-        if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -1; }
-        if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = 1; }
-        if (e.key === "ArrowLeft" && dx === 0) { dx = -1; dy = 0; }
-        if (e.key === "ArrowRight" && dx === 0) { dx = 1; dy = 0; }
+        if (e.key === "ArrowUp")    setDirection(0, -1);
+        if (e.key === "ArrowDown")  setDirection(0,  1);
+        if (e.key === "ArrowLeft")  setDirection(-1, 0);
+        if (e.key === "ArrowRight") setDirection(1,  0);
     }
 
     function game() {
+        turnLocked = false;
+
         let head = {
             x: snake[0].x + dx,
             y: snake[0].y + dy
@@ -133,13 +145,11 @@
 
         snake.unshift(head);
 
-        
         if (head.x === food.x && head.y === food.y) {
             food = genFood();
             level++;
             document.getElementById("lvl").textContent = "Уровень: " + level;
 
-            
             clearInterval(timer);
             speed = Math.max(60, speed - 15);
             timer = setInterval(game, speed);
@@ -154,11 +164,9 @@
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        
         ctx.fillStyle = "red";
         ctx.fillRect(food.x * CELL, food.y * CELL, CELL, CELL);
 
-        
         ctx.fillStyle = "lime";
         for (let s of snake) {
             ctx.fillRect(s.x * CELL, s.y * CELL, CELL - 1, CELL - 1);
